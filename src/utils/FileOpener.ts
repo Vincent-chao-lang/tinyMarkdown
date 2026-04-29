@@ -14,8 +14,8 @@ type FileOpenedCallback = (file: FileOpenedEvent) => void;
 
 // 获取原生模块
 const LINKING_ERROR =
-  `The package 'tiny-markdown' doesn't seem to be linked. Make sure: \n\n` +
-  Platform.select({ios: "- You have run 'pod install'\n", default: ''}) +
+  'The package \'tiny-markdown\' doesn\'t seem to be linked. Make sure: \n\n' +
+  Platform.select({ios: '- You have run \'pod install\'\n', default: ''}) +
   '- You rebuilt the app after installing the package\n' +
   '- You are not using Expo Go\n';
 

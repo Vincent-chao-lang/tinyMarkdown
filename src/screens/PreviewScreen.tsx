@@ -12,7 +12,6 @@ import Markdown from 'react-native-markdown-display';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
-  MarkdownFile,
   FontSize,
   FONT_SIZES,
   PreviewError,
@@ -55,6 +54,7 @@ export function PreviewScreen({
   // 读取文件内容
   useEffect(() => {
     loadFileContent();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fileUri]);
 
   const loadFileContent = async () => {
