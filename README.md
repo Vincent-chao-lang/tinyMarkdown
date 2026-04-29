@@ -1,75 +1,117 @@
+<div align="center">
+
 # tinyMarkdown
+
+**极简 Markdown 阅读器**
+
+[![CI](https://img.shields.io/github/actions/workflow/status/username/tinyMarkdown/ci.yml?branch=main)](https://github.com/username/tinyMarkdown/actions)
+[![iOS](https://img.shields.io/badge/iOS-17%2B-blue)](https://github.com/username/tinyMarkdown)
+[![Android](https://img.shields.io/badge/Android-8%2B-green)](https://github.com/username/tinyMarkdown)
+[![License](https://img.shields.io/github/license/username/tinyMarkdown)](LICENSE)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
 一个极简的 Markdown **阅读器**（只读），支持 iOS 和 Android 平台。
 
-## 特性
+[功能特性](#-功能特性) • [快速开始](#-快速开始) • [文档](#-文档) • [贡献](#-贡献)
 
-- 📄 **只读预览** - 极简阅读体验，不支持编辑
-- 📏 **文件限制** - 最大 1MB，超出提示「文件过大，无法预览」
-- 🔒 **纯本地离线** - 不上传、不联网、不隐私收集
+</div>
+
+---
+
+## ✨ 功能特性
+
+- 📄 **只读预览** - 极简阅读体验，专注于内容
+- 📏 **文件限制** - 最大 1MB，轻量快速
+- 🔒 **隐私优先** - 纯本地离线，无网络请求，无数据收集
 - 📱 **系统关联** - 支持从系统文件 App 打开 .md 文件
 - 🔤 **字体调节** - 支持 14/16/18/20 四档字体大小
 - 🎨 **基础语法** - 标题、列表、粗体、斜体、代码块、链接、图片
 
-## 快速开始
+## 📸 截图
 
-### 方法一：使用现有项目结构（推荐）
+### iOS
+<table>
+  <tr>
+    <td><img src="docs/screenshots/ios-welcome.png" width="250" alt="iOS 欢迎界面"></td>
+    <td><img src="docs/screenshots/ios-preview.png" width="250" alt="iOS 预览界面"></td>
+    <td><img src="docs/screenshots/ios-font-size.png" width="250" alt="iOS 字体设置"></td>
+  </tr>
+  <tr>
+    <td align="center">欢迎界面</td>
+    <td align="center">Markdown 预览</td>
+    <td align="center">字体大小调节</td>
+  </tr>
+</table>
+
+### Android
+<table>
+  <tr>
+    <td><img src="docs/screenshots/android-welcome.png" width="250" alt="Android 欢迎界面"></td>
+    <td><img src="docs/screenshots/android-preview.png" width="250" alt="Android 预览界面"></td>
+    <td><img src="docs/screenshots/android-file-open.png" width="250" alt="Android 文件打开"></td>
+  </tr>
+  <tr>
+    <td align="center">欢迎界面</td>
+    <td align="center">Markdown 预览</td>
+    <td align="center">文件打开</td>
+  </tr>
+</table>
+
+## 🚀 快速开始
+
+### 前置要求
+
+- Node.js >= 18
+- npm >= 9
+- iOS: macOS + Xcode 15+
+- Android: Android Studio
+
+### 安装
 
 ```bash
-# 1. 克隆或下载此项目
+# 克隆仓库
+git clone https://github.com/username/tinyMarkdown.git
 cd tinyMarkdown
 
-# 2. 安装依赖
-npm install
-
-# 3. iOS - 安装 CocoaPods
-cd ios && pod install && cd ..
-
-# 4. 运行项目
-npm run ios    # iOS
-npm run android # Android
-```
-
-### 方法二：创建新的 React Native 项目
-
-```bash
-# 1. 创建新项目
-npx react-native@latest init TinyMarkdown
-
-# 2. 将以下文件/目录复制到新项目：
-#    - src/
-#    - package.json (合并依赖)
-#    - ios/tinyMarkdown/FileOpenerModule.* → ios/TinyMarkdown/
-#    - ios/tinyMarkdown/AppDelegate.* → ios/TinyMarkdown/
-#    - android/app/src/main/java/com/tinymarkdown/ → android/app/src/main/java/com/tinymarkdown/
-#    - 其他配置文件
-
-# 3. 安装依赖
-npm install
-cd ios && pod install && cd ..
-
-# 4. 运行
-npm run ios
-```
-
-## 开发命令
-
-```bash
 # 安装依赖
 npm install
 
-# iOS - 安装 pods
+# iOS - 安装 CocoaPods
 cd ios && pod install && cd ..
+```
 
-# iOS 开发
+### 运行
+
+```bash
+# iOS
 npm run ios
 
-# Android 开发
+# Android
 npm run android
 
-# 启动 Metro 打包服务器
+# 启动 Metro
 npm start
+```
 
+## 📖 使用指南
+
+### 打开文件
+
+1. 在系统文件 App 中找到 .md 文件
+2. 点击文件
+3. 选择 tinyMarkdown 打开
+
+### 调节字体
+
+点击右上角的 `Aa` 按钮可以切换字体大小：
+- 小号: 14px
+- 中号: 16px（默认）
+- 大号: 18px
+- 特大: 20px
+
+## 🛠️ 开发
+
+```bash
 # 类型检查
 npm run typecheck
 
@@ -80,61 +122,73 @@ npm run lint
 npm test
 ```
 
-## 项目结构
+## 📁 项目结构
 
 ```
 tinyMarkdown/
 ├── src/
-│   ├── screens/
-│   │   └── PreviewScreen.tsx      # 主预览界面
-│   ├── utils/
-│   │   ├── FileOpener.ts          # 文件打开原生模块桥接
-│   │   └── markdownParser.ts      # Markdown 工具函数
-│   ├── types/
-│   │   └── index.ts               # TypeScript 类型定义
-│   └── App.tsx                    # 应用入口
-├── ios/
-│   └── tinyMarkdown/
-│       ├── FileOpenerModule.h/m   # iOS 原生模块
-│       ├── AppDelegate.h/mm       # iOS 应用委托
-│       └── Info.plist             # iOS 配置（含文件关联）
-├── android/
-│   └── app/src/main/
-│       ├── java/com/tinymarkdown/
-│       │   ├── FileOpenerModule.java    # Android 原生模块
-│       │   ├── FileOpenerPackage.java   # Android 模块注册
-│       │   └── MainActivity.java        # Android 应用活动
-│       └── AndroidManifest.xml          # Android 配置（含文件关联）
-├── package.json
-├── tsconfig.json
-├── CLAUDE.md
-├── NATIVE_SETUP.md
-└── README.md
+│   ├── screens/          # 页面组件
+│   │   └── PreviewScreen.tsx
+│   ├── utils/            # 工具函数
+│   │   ├── FileOpener.ts
+│   │   └── markdownParser.ts
+│   ├── types/            # 类型定义
+│   │   └── index.ts
+│   └── App.tsx           # 应用入口
+├── ios/                  # iOS 原生代码
+├── android/              # Android 原生代码
+└── docs/                 # 文档
 ```
 
-## 支持的 Markdown 语法
+## 🎯 支持的 Markdown 语法
 
-- 标题（# ## ### #### ##### ######）
-- 粗体（**text**）和斜体（*text*）
-- 有序和无序列表
-- 代码块和行内代码
-- 链接和图片
-- 引用块（>）
-- 分隔线（---）
+| 语法 | 支持 | 示例 |
+|------|------|------|
+| 标题 | ✅ | `# H1` ~ `###### H6` |
+| 粗体 | ✅ | `**text**` |
+| 斜体 | ✅ | `*text*` |
+| 列表 | ✅ | `- item` 或 `1. item` |
+| 代码块 | ✅ | ``` ``` ``` |
+| 行内代码 | ✅ | `` `code` `` |
+| 链接 | ✅ | `[text](url)` |
+| 图片 | ✅ | `![alt](url)` |
+| 引用 | ✅ | `> quote` |
+| 分隔线 | ✅ | `---` |
+| 表格 | ❌ | - |
+| 删除线 | ❌ | - |
+| 任务列表 | ❌ | - |
 
-**不支持**：表格、删除线、任务列表、脚注等扩展语法
+## 📚 文档
 
-## 系统要求
+- [快速开始指南](QUICKSTART.md) - 详细的安装和配置说明
+- [原生模块配置](NATIVE_SETUP.md) - 文件关联配置详解
+- [贡献指南](CONTRIBUTING.md) - 如何贡献代码
+- [更新日志](CHANGELOG.md) - 版本更新记录
 
-- Node.js >= 18
-- npm >= 9
-- iOS: macOS + Xcode 15+
-- Android: Android SDK + Android Studio
+## 🤝 贡献
 
-## 原生模块开发
+欢迎贡献！请查看 [CONTRIBUTING.md](CONTRIBUTING.md) 了解详情。
 
-详细的文件关联配置说明请参考 [NATIVE_SETUP.md](./NATIVE_SETUP.md)。
+## 📝 许可证
 
-## 许可证
+本项目基于 [MIT](LICENSE) 许可证开源。
 
-MIT
+## 🙏 致谢
+
+- [React Native](https://reactnative.dev/) - 跨平台移动应用框架
+- [react-native-markdown-display](https://github.com/ammarahm-ed/react-native-markdown-display) - Markdown 渲染组件
+
+## 📧 联系方式
+
+- Issues: [GitHub Issues](https://github.com/username/tinyMarkdown/issues)
+- Discussions: [GitHub Discussions](https://github.com/username/tinyMarkdown/discussions)
+
+---
+
+<div align="center">
+
+**Made with ❤️ by tinyMarkdown team**
+
+[⬆ 返回顶部](#-readmemd)
+
+</div>

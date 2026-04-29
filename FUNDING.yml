@@ -1,0 +1,12 @@
+# GitHub 赞助配置
+
+# 这些是支持此项目的赞助等级。可在
+# https://github.com/username/tinyMarkdown 中配置。
+
+github:
+  usernames:
+    - yourusername
+
+patreon: yourusername
+opensource: Add your own
+custom: ["https://paypal.me/yourusername"]

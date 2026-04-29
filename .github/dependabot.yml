@@ -1,0 +1,40 @@
+version: 2
+updates:
+  # npm 依赖
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "yourusername"
+    assignees:
+      - "yourusername"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    allow:
+      - dependency-type: "production"
+      - dependency-type: "development"
+    ignore:
+      # 忽略主要版本更新
+      - dependency-name: "react"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react-native"
+        update-types: ["version-update:semver-major"]
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "yourusername"
+    assignees:
+      - "yourusername"
+    commit-message:
+      prefix: "ci"
+      include: "scope"
