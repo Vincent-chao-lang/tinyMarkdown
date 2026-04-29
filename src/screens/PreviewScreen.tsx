@@ -74,7 +74,7 @@ export function PreviewScreen({
       const text = await response.text();
       setContent(sanitizeMarkdown(text));
       setLoading(false);
-    } catch (err) {
+    } catch {
       setError({
         type: 'read_error',
         message: '无法读取文件',
