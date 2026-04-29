@@ -2,7 +2,7 @@ import React, {useState, useEffect, useCallback} from 'react';
 import {StatusBar, StyleSheet, View, Text, SafeAreaView} from 'react-native';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {PreviewScreen} from './screens/PreviewScreen';
-import {fileOpener} from './utils/FileOpener';
+import {FileOpener, fileOpener} from './utils/FileOpener';
 import {isValidMarkdownFile} from './utils/markdownParser';
 import type {FileOpenedEvent} from './types';
 
@@ -49,7 +49,7 @@ function App(): React.JSX.Element {
   useEffect(() => {
     const checkInitialFile = async () => {
       try {
-        const initialFile = await fileOpener.checkInitialFile();
+        const initialFile = await FileOpener.checkInitialFile();
         if (initialFile) {
           handleFileOpened(initialFile);
         }
