@@ -36,6 +36,7 @@ jobs:
       - name: Install CocoaPods
         run: |
           cd ios
+          rm -f Gemfile.lock
           pod install
 
       - name: Build iOS (Debug)
