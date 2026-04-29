@@ -35,8 +35,10 @@ jobs:
 
       - name: Install CocoaPods
         run: |
+          rm -f Gemfile.lock ios/Gemfile.lock
           cd ios
-          rm -f Gemfile.lock
+          gem install bundler -v '> 2.0'
+          bundle install
           pod install
 
       - name: Build iOS (Debug)
