@@ -48,7 +48,7 @@ jobs:
             -scheme tinyMarkdown \
             -configuration Debug \
             -sdk iphonesimulator \
-            -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest' \
+            -destination 'platform=iOS Simulator,name=Any iOS Simulator Device' \
             clean build \
             CODE_SIGNING_ALLOWED=NO
 
