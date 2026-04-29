@@ -1,6 +1,6 @@
 import React, {useState, useEffect, useCallback} from 'react';
-import {StatusBar, StyleSheet, View, Text, SafeAreaView} from 'react-native';
-import {SafeAreaProvider} from 'react-native-safe-area-context';
+import {StatusBar, StyleSheet, View, Text} from 'react-native';
+import {SafeAreaProvider, SafeAreaView} from 'react-native-safe-area-context';
 import {PreviewScreen} from './screens/PreviewScreen';
 import {FileOpener, fileOpener} from './utils/FileOpener';
 import {isValidMarkdownFile} from './utils/markdownParser';
