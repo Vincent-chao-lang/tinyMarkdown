@@ -61,5 +61,21 @@ jobs:
             -scheme tinyMarkdown \
             -configuration Release \
             -sdk iphoneos \
+            -archivePath ios/build/tinyMarkdown.xcarchive \
             clean build \
             CODE_SIGNING_ALLOWED=NO
+
+      - name: Package iOS (Release)
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          # 创建 .app 目录的 zip 包
+          cd ios/build/Release-iphoneos
+          zip -r tinyMarkdown.app.zip tinyMarkdown.app
+
+      - name: Upload iOS Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-release
+          path: ios/build/Release-iphoneos/tinyMarkdown.app.zip
+          retention-days: 90
