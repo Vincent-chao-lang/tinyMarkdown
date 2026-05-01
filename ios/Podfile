@@ -23,6 +23,9 @@ target 'tinyMarkdown' do
     :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
 
+  # 本地原生模块
+  pod 'FileOpener', :path => File.dirname(__FILE__)
+
   post_install do |installer|
     react_native_post_install(
       installer,

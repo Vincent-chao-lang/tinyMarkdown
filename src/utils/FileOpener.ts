@@ -2,7 +2,7 @@
  * FileOpener - 原生文件打开模块桥接
  */
 
-import {NativeEventEmitter, NativeModules, Platform} from 'react-native';
+import {NativeModules, Platform} from 'react-native';
 
 type FileOpenedEvent = {
   uri: string;
@@ -10,7 +10,12 @@ type FileOpenedEvent = {
   size: number;
 };
 
-type FileOpenedCallback = (file: FileOpenedEvent) => void;
+type PickedDocument = {
+  uri: string;
+  name: string;
+  size: number;
+  content: string;
+};
 
 // 获取原生模块
 const LINKING_ERROR =
@@ -28,91 +33,79 @@ const FileOpenerModule =
         },
       };
 
-// 创建事件发射器
-let eventEmitter: NativeEventEmitter | null = null;
+const DocumentPickerModule =
+  NativeModules.DocumentPickerModule
+    ? NativeModules.DocumentPickerModule
+    : {
+        pickDocument: () => {
+          throw new Error(LINKING_ERROR);
+        },
+      };
 
-try {
-  eventEmitter = new NativeEventEmitter(NativeModules.FileOpenerModule);
-} catch (error) {
-  console.warn('Failed to create FileOpener event emitter:', error);
-}
+const FileReaderModule =
+  NativeModules.MarkdownFileReaderModule
+    ? NativeModules.MarkdownFileReaderModule
+    : {
+        readFile: () => {
+          throw new Error(LINKING_ERROR);
+        },
+      };
+
+// 调试：检查FileReaderModule是否可用
+console.log('[FileOpener] NativeModules keys:', Object.keys(NativeModules).slice(0, 20));
+console.log('[FileOpener] FileReaderModule:', FileReaderModule);
+console.log('[FileOpener] FileReaderModule.readFile:', FileReaderModule?.readFile);
 
 /**
- * FileOpener 类 - 处理文件打开事件
+ * FileOpener 类 - 处理文件打开操作
  */
 export class FileOpener {
-  private listeners: FileOpenedCallback[] = [];
-  private subscription: any | null = null;
-
   /**
    * 检查应用启动时是否有初始文件
    */
   static async checkInitialFile(): Promise<FileOpenedEvent | null> {
     try {
+      console.log('[FileOpener] checkInitialFile called');
       const result = await FileOpenerModule.checkInitialFile();
+      console.log('[FileOpener] checkInitialFile result:', result);
       return result;
     } catch (error) {
-      console.error('Error checking initial file:', error);
+      console.error('[FileOpener] Error checking initial file:', error);
       return null;
     }
   }
 
   /**
-   * 添加文件打开监听器
+   * 打开文档选择器选择文件
    */
-  addListener(callback: FileOpenedCallback): () => void {
-    this.listeners.push(callback);
-
-    // 如果是第一个监听器，设置原生事件监听
-    if (this.listeners.length === 1 && eventEmitter) {
-      this.subscription = eventEmitter.addListener('FileOpened', (event: FileOpenedEvent) => {
-        this.listeners.forEach(listener => {
-          try {
-            listener(event);
-          } catch (error) {
-            console.error('Error in file opened listener:', error);
-          }
-        });
-      });
-    }
-
-    // 返回取消监听函数
-    return () => {
-      this.removeListener(callback);
-    };
-  }
-
-  /**
-   * 移除文件打开监听器
-   */
-  removeListener(callback: FileOpenedCallback): void {
-    const index = this.listeners.indexOf(callback);
-    if (index > -1) {
-      this.listeners.splice(index, 1);
-    }
-
-    // 如果没有监听器了，移除原生事件监听
-    if (this.listeners.length === 0 && this.subscription) {
-      this.subscription.remove();
-      this.subscription = null;
+  static async pickDocument(): Promise<PickedDocument> {
+    try {
+      const result = await DocumentPickerModule.pickDocument();
+      return result;
+    } catch (error: any) {
+      if (error.code === 'CANCELLED') {
+        throw new Error('取消选择');
+      }
+      console.error('Error picking document:', error);
+      throw error;
     }
   }
 
   /**
-   * 移除所有监听器
+   * 读取文件内容（从 file:// URI）
    */
-  removeAllListeners(): void {
-    this.listeners = [];
-
-    if (this.subscription) {
-      this.subscription.remove();
-      this.subscription = null;
+  static async readFile(fileUri: string): Promise<{uri: string; content: string; size: number}> {
+    try {
+      console.log('[FileOpener] readFile called with URI:', fileUri);
+      const result = await FileReaderModule.readFile(fileUri);
+      console.log('[FileOpener] readFile result, content length:', result.content?.length);
+      return result;
+    } catch (error: any) {
+      console.error('[FileOpener] Error reading file:', error);
+      throw error;
     }
   }
 }
-
-// 导出单例
-export const fileOpener = new FileOpener();
 
 // 默认导出
 export default FileOpenerModule;

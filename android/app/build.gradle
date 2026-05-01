@@ -105,6 +105,16 @@ android {
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
     }
+
+    // 打包优化：只为arm64-v8a架构构建
+    splits {
+        abi {
+            enable true
+            reset()
+            include 'arm64-v8a'  // 只包含64位ARM（现代Android设备）
+            universalApk false
+        }
+    }
 }
 
 dependencies {

@@ -7,9 +7,9 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Platform,
+  Clipboard,
+  Alert,
 } from 'react-native';
-import Markdown from 'react-native-markdown-display';
-import {SafeAreaView} from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   FontSize,
@@ -21,6 +21,8 @@ import {
   formatFileSize,
   sanitizeMarkdown,
 } from '../utils/markdownParser';
+import {SimpleMarkdown} from '../components/SimpleMarkdown';
+import {FileOpener} from '../utils/FileOpener';
 
 const FONT_SIZE_KEY = '@tiny_markdown_font_size';
 
@@ -29,6 +31,7 @@ interface PreviewScreenProps {
   fileName: string;
   fileSize: number;
   onClose?: () => void;
+  content?: string; // 可选：直接传入的文件内容
 }
 
 export function PreviewScreen({
@@ -36,11 +39,13 @@ export function PreviewScreen({
   fileName,
   fileSize,
   onClose,
+  content: initialContent,
 }: PreviewScreenProps) {
   const [content, setContent] = useState<string>('');
   const [fontSize, setFontSize] = useState<FontSize>('medium');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<PreviewError | null>(null);
+  const [copied, setCopied] = useState(false);
 
   // 加载字体大小设置
   useEffect(() => {
@@ -59,6 +64,15 @@ export function PreviewScreen({
 
   const loadFileContent = async () => {
     try {
+      console.log('[PreviewScreen] loadFileContent called, initialContent:', !!initialContent, 'fileUri:', fileUri);
+
+      // 如果有直接传入的内容，使用它
+      if (initialContent) {
+        setContent(sanitizeMarkdown(initialContent));
+        setLoading(false);
+        return;
+      }
+
       // 检查文件大小
       if (isFileTooLarge(fileSize)) {
         setError({
@@ -70,14 +84,16 @@ export function PreviewScreen({
       }
 
       // 读取文件内容
-      const response = await fetch(fileUri);
-      const text = await response.text();
-      setContent(sanitizeMarkdown(text));
+      console.log('[PreviewScreen] Calling FileOpener.readFile with:', fileUri);
+      const {content: fileContent} = await FileOpener.readFile(fileUri);
+      console.log('[PreviewScreen] File read successfully, content length:', fileContent?.length);
+      setContent(sanitizeMarkdown(fileContent));
       setLoading(false);
-    } catch {
+    } catch (error) {
+      console.error('[PreviewScreen] Error loading file:', error);
       setError({
         type: 'read_error',
-        message: '无法读取文件',
+        message: `无法读取文件: ${error}`,
       });
       setLoading(false);
     }
@@ -97,211 +113,100 @@ export function PreviewScreen({
     await AsyncStorage.setItem(FONT_SIZE_KEY, nextSize);
   }, [fontSize]);
 
-  // Markdown 样式配置
-  const markdownStyles = StyleSheet.create({
-    body: {
-      fontSize: FONT_SIZES[fontSize],
-      lineHeight: FONT_SIZES[fontSize] * 1.6,
-      color: '#333',
-    },
-    heading1: {
-      fontSize: FONT_SIZES[fontSize] * 1.8,
-      fontWeight: 'bold',
-      marginTop: 16,
-      marginBottom: 8,
-      color: '#000',
-    },
-    heading2: {
-      fontSize: FONT_SIZES[fontSize] * 1.5,
-      fontWeight: 'bold',
-      marginTop: 14,
-      marginBottom: 7,
-      color: '#000',
-    },
-    heading3: {
-      fontSize: FONT_SIZES[fontSize] * 1.3,
-      fontWeight: 'bold',
-      marginTop: 12,
-      marginBottom: 6,
-      color: '#000',
-    },
-    heading4: {
-      fontSize: FONT_SIZES[fontSize] * 1.15,
-      fontWeight: 'bold',
-      marginTop: 10,
-      marginBottom: 5,
-      color: '#000',
-    },
-    heading5: {
-      fontSize: FONT_SIZES[fontSize] * 1.1,
-      fontWeight: 'bold',
-      marginTop: 8,
-      marginBottom: 4,
-      color: '#000',
-    },
-    heading6: {
-      fontSize: FONT_SIZES[fontSize],
-      fontWeight: 'bold',
-      marginTop: 8,
-      marginBottom: 4,
-      color: '#666',
-    },
-    strong: {
-      fontWeight: 'bold',
-      color: '#000',
-    },
-    em: {
-      fontStyle: 'italic',
-    },
-    link: {
-      color: '#0066cc',
-      textDecorationLine: 'underline',
-    },
-    blockquote: {
-      borderLeftWidth: 4,
-      borderLeftColor: '#ddd',
-      paddingLeft: 12,
-      marginLeft: 0,
-      marginTop: 8,
-      marginBottom: 8,
-      color: '#666',
-    },
-    code_inline: {
-      fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
-      fontSize: FONT_SIZES[fontSize] * 0.9,
-      backgroundColor: '#f5f5f5',
-      paddingHorizontal: 4,
-      paddingVertical: 2,
-      borderRadius: 3,
-    },
-    code_block: {
-      fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
-      fontSize: FONT_SIZES[fontSize] * 0.9,
-      backgroundColor: '#f5f5f5',
-      padding: 12,
-      borderRadius: 6,
-      marginVertical: 8,
-      overflow: 'hidden',
-    },
-    fence: {
-      fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
-      fontSize: FONT_SIZES[fontSize] * 0.9,
-      backgroundColor: '#f5f5f5',
-      padding: 12,
-      borderRadius: 6,
-      marginVertical: 8,
-    },
-    hr: {
-      backgroundColor: '#ddd',
-      height: 1,
-      marginVertical: 12,
-    },
-    list_item: {
-      marginTop: 4,
-      marginBottom: 4,
-    },
-    bullet_list: {
-      marginLeft: 20,
-    },
-    ordered_list: {
-      marginLeft: 20,
-    },
-    table: {
-      borderWidth: 1,
-      borderColor: '#ddd',
-      borderRadius: 4,
-      marginVertical: 8,
-    },
-    th: {
-      borderWidth: 1,
-      borderColor: '#ddd',
-      padding: 8,
-      backgroundColor: '#f5f5f5',
-      fontWeight: 'bold',
-    },
-    td: {
-      borderWidth: 1,
-      borderColor: '#ddd',
-      padding: 8,
-    },
-    paragraph: {
-      marginTop: 8,
-      marginBottom: 8,
-    },
-    softbreak: {
-      width: '100%',
-      height: 0,
-    },
-    hardbreak: {
-      width: '100%',
-      height: 8,
-    },
-  });
+  const handleCopy = useCallback(async () => {
+    try {
+      await Clipboard.setString(content);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000); // 2秒后重置状态
+      Alert.alert('复制成功', '全部内容已复制到剪贴板\n\n💡 提示：长按文字可选择部分复制');
+    } catch (error) {
+      Alert.alert('复制失败', '无法复制内容到剪贴板');
+    }
+  }, [content]);
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container} edges={['top']}>
+      <View style={styles.container}>
         <View style={styles.centerContainer}>
-          <ActivityIndicator size="large" color="#333" />
-          <Text style={styles.loadingText}>加载中...</Text>
+          <ActivityIndicator size="large" color="#34495E" />
+          <Text style={styles.loadingText}>正在加载文件...</Text>
+          <Text style={styles.loadingSubtext}>请稍候</Text>
         </View>
-      </SafeAreaView>
+      </View>
     );
   }
 
   if (error) {
     return (
-      <SafeAreaView style={styles.container} edges={['top']}>
+      <View style={styles.container}>
         <View style={styles.centerContainer}>
-          <Text style={styles.errorIcon}>⚠️</Text>
+          <View style={styles.errorIconContainer}>
+            <Text style={styles.errorIcon}>⚠️</Text>
+          </View>
+          <Text style={styles.errorTitle}>无法加载文件</Text>
           <Text style={styles.errorText}>{error.message}</Text>
+          {onClose && (
+            <TouchableOpacity style={styles.errorButton} onPress={onClose}>
+              <Text style={styles.errorButtonText}>返回</Text>
+            </TouchableOpacity>
+          )}
         </View>
-      </SafeAreaView>
+      </View>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <View style={styles.container}>
       {/* 顶部栏 */}
       <View style={styles.header}>
         {onClose && (
           <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-            <Text style={styles.closeButtonText}>✕</Text>
+            <Text style={styles.closeButtonText}>←</Text>
           </TouchableOpacity>
         )}
-        <Text
-          style={[styles.fileName, !onClose && styles.fileNameNoClose]}
-          numberOfLines={1}>
-          {fileName}
-        </Text>
-        <TouchableOpacity
-          style={styles.fontSizeButton}
-          onPress={changeFontSize}>
-          <Text style={styles.fontSizeText}>Aa</Text>
-          <Text style={styles.fontSizeLabel}>{FONT_SIZES[fontSize]}</Text>
-        </TouchableOpacity>
+        <View style={styles.fileNameContainer}>
+          <Text
+            style={[styles.fileName, !onClose && styles.fileNameNoClose]}
+            numberOfLines={1}>
+            {fileName}
+          </Text>
+        </View>
+        <View style={styles.headerButtons}>
+          <TouchableOpacity
+            style={styles.iconButton}
+            onPress={handleCopy}>
+            <Text style={styles.iconButtonText}>{copied ? '✓' : '📋'}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.fontSizeButton}
+            onPress={changeFontSize}>
+            <Text style={styles.fontSizeText}>Aa</Text>
+            <Text style={styles.fontSizeLabel}>{FONT_SIZES[fontSize]}</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Markdown 内容 */}
       <ScrollView
         style={styles.content}
         contentContainerStyle={styles.contentContainer}>
-        <Markdown style={markdownStyles}>{content}</Markdown>
+        <SimpleMarkdown content={content} fontSize={fontSize} />
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#FAFBFC',
+    paddingTop: 50,
   },
   centerContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    padding: 32,
   },
   header: {
     flexDirection: 'row',
@@ -309,64 +214,121 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    backgroundColor: '#fff',
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#E5E5EA',
   },
   closeButton: {
-    padding: 4,
+    width: 36,
+    height: 36,
+    justifyContent: 'center',
+    alignItems: 'center',
     marginRight: 8,
   },
   closeButtonText: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#666',
-  },
-  fileName: {
-    flex: 1,
-    fontSize: 16,
+    fontSize: 24,
     fontWeight: '600',
-    color: '#333',
+    color: '#34495E',
+  },
+  fileNameContainer: {
+    flex: 1,
     marginRight: 12,
   },
+  fileName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1A1A1A',
+  },
   fileNameNoClose: {
-    marginLeft: 0,
+    marginLeft: 44,
+  },
+  headerButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  iconButton: {
+    backgroundColor: '#F2F2F7',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    minWidth: 40,
+    alignItems: 'center',
+  },
+  iconButtonText: {
+    fontSize: 18,
   },
   fontSizeButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f5f5f5',
-    paddingHorizontal: 10,
-    paddingVertical: 6,
+    backgroundColor: '#F2F2F7',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
     borderRadius: 8,
   },
   fontSizeText: {
-    fontSize: 14,
-    fontWeight: 'bold',
+    fontSize: 16,
+    fontWeight: '600',
     marginRight: 6,
+    color: '#1A1A1A',
   },
   fontSizeLabel: {
-    fontSize: 12,
-    color: '#666',
-    minWidth: 20,
+    fontSize: 13,
+    color: '#8E8E93',
+    minWidth: 24,
+    fontWeight: '500',
   },
   content: {
     flex: 1,
   },
   contentContainer: {
-    padding: 16,
+    padding: 20,
   },
   loadingText: {
-    marginTop: 12,
-    fontSize: 16,
-    color: '#666',
+    marginTop: 16,
+    fontSize: 17,
+    color: '#1A1A1A',
+    fontWeight: '600',
+  },
+  loadingSubtext: {
+    marginTop: 4,
+    fontSize: 14,
+    color: '#8E8E93',
+  },
+  errorIconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: '#FFF5F5',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 20,
   },
   errorIcon: {
-    fontSize: 48,
-    marginBottom: 16,
+    fontSize: 40,
+  },
+  errorTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#1A1A1A',
+    marginBottom: 8,
   },
   errorText: {
     fontSize: 16,
-    color: '#666',
+    color: '#8E8E93',
     textAlign: 'center',
+    marginBottom: 24,
+    lineHeight: 22,
+  },
+  errorButton: {
+    backgroundColor: '#34495E',
+    paddingHorizontal: 32,
+    paddingVertical: 14,
+    borderRadius: 12,
+  },
+  errorButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#fff',
   },
 });

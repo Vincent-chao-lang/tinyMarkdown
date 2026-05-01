@@ -10,7 +10,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * FileOpenerPackage - 注册 FileOpenerModule
+ * FileOpenerPackage - 注册所有文件相关的原生模块
  */
 public class FileOpenerPackage implements ReactPackage {
 
@@ -23,6 +23,8 @@ public class FileOpenerPackage implements ReactPackage {
     public List<NativeModule> createNativeModules(ReactApplicationContext reactContext) {
         List<NativeModule> modules = new ArrayList<>();
         modules.add(new FileOpenerModule(reactContext));
+        modules.add(new DocumentPickerModule(reactContext));
+        modules.add(new FileReaderModule(reactContext));
         return modules;
     }
 }

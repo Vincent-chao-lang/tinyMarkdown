@@ -1,18 +1,11 @@
 package com.tinymarkdown;
 
-import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.OpenableColumns;
 import android.content.SharedPreferences;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
 import com.facebook.react.ReactActivity;
-import com.facebook.react.ReactInstanceManager;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.Arguments;
@@ -30,7 +23,7 @@ public class MainActivity extends ReactActivity {
      */
     @Override
     protected String getMainComponentName() {
-        return "TinyMarkdown";
+        return "tinyMarkdown";
     }
 
     /**
@@ -82,31 +75,9 @@ public class MainActivity extends ReactActivity {
                 .putLong("initialFileSize", fileInfo.size)
                 .apply();
 
-        // 发送事件到 React Native
-        ReactInstanceManager reactInstanceManager = getReactNativeHost().getReactInstanceManager();
-        ReactContext reactContext = reactInstanceManager.getCurrentReactContext();
+        android.util.Log.d(TAG, "File URI stored: " + uri + ", Name: " + fileInfo.name + ", Size: " + fileInfo.size);
 
-        if (reactContext != null) {
-            sendFileEventToJS(reactContext, uri.toString(), fileInfo.name, fileInfo.size);
-        }
-    }
-
-    /**
-     * 发送文件事件到 JavaScript
-     */
-    private void sendFileEventToJS(ReactContext context, String uri, String name, long size) {
-        try {
-            WritableMap params = Arguments.createMap();
-            params.putString("uri", uri);
-            params.putString("name", name);
-            params.putDouble("size", (double) size);
-
-            context
-                    .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
-                    .emit("FileOpened", params);
-
-        } catch (Exception e) {
-            android.util.Log.e(TAG, "Error sending file event", e);
-        }
+        // 注意：不在MainActivity中直接发送事件到JS
+        // 而是让React Native端通过FileOpenerModule主动查询
     }
 }
