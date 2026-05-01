@@ -10,7 +10,7 @@ import {FileOpener} from './utils/FileOpener';
 import {isValidMarkdownFile} from './utils/markdownParser';
 import type {FileOpenedEvent} from './types';
 
-interface AppState {
+interface AppData {
   fileUri: string | null;
   fileName: string | null;
   fileSize: number | null;
@@ -18,7 +18,7 @@ interface AppState {
 }
 
 function App(): React.JSX.Element {
-  const [appState, setAppState] = useState<AppState>({
+  const [appState, setAppState] = useState<AppData>({
     fileUri: null,
     fileName: null,
     fileSize: null,
