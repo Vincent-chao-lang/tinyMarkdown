@@ -4,7 +4,7 @@
  */
 
 import React, {useState, useEffect, useCallback} from 'react';
-import {StatusBar, StyleSheet, View, Text, AppState, TouchableOpacity, ActivityIndicator, Alert, Animated, Platform, NativeModules} from 'react-native';
+import {StatusBar, StyleSheet, View, Text, AppState, TouchableOpacity, ActivityIndicator, Alert, Animated, Platform} from 'react-native';
 import {PreviewScreen} from './screens/PreviewScreen';
 import {FileOpener} from './utils/FileOpener';
 import {isValidMarkdownFile} from './utils/markdownParser';

@@ -3,8 +3,6 @@ import {
   Text,
   StyleSheet,
   View,
-  Linking,
-  Alert,
   Image,
   TextInput,
   Platform,
@@ -19,7 +17,6 @@ interface SimpleMarkdownProps {
 
 export function SimpleMarkdown({content, fontSize}: SimpleMarkdownProps) {
   const [imageErrors, setImageErrors] = useState<Set<string>>(new Set());
-  const [imageSizes, setImageSizes] = useState<Map<string, {width: number, height: number}>>(new Map());
 
   // 解析 Markdown 并渲染为可选择的内容
   const renderMarkdown = () => {
@@ -32,7 +29,7 @@ export function SimpleMarkdown({content, fontSize}: SimpleMarkdownProps) {
 
     const flushList = () => {
       if (listItems.length > 0) {
-        const listText = listItems.map((item, index) => `• ${item}`).join('\n');
+        const listText = listItems.map((item, _index) => `• ${item}`).join('\n');
         elements.push(
           <TextInput
             key={`list-${elements.length}`}
@@ -94,7 +91,7 @@ export function SimpleMarkdown({content, fontSize}: SimpleMarkdownProps) {
           if (!inCodeBlock) {
             inCodeBlock = true;
           }
-          codeLines.push(trimmedLine.replace(/^    /, ''));
+          codeLines.push(trimmedLine.replace(/^ {4}/, ''));
         }
         return;
       }
@@ -160,10 +157,8 @@ export function SimpleMarkdown({content, fontSize}: SimpleMarkdownProps) {
             <Image
               source={{uri: url}}
               style={[styles.image, {width: '100%', height: 200}]}
-              onLoad={(event) => {
-                const {width, height} = event.nativeEvent.source;
-                console.log('[SimpleMarkdown] Image loaded:', url, 'Size:', width, 'x', height);
-                setImageSizes(prev => new Map(prev).set(url, {width, height}));
+              onLoad={() => {
+                // Image loaded successfully
               }}
               onError={(error) => {
                 console.log('[SimpleMarkdown] Image error:', url, error.nativeEvent);

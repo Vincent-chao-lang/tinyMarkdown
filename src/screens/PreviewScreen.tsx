@@ -6,7 +6,6 @@ import {
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
-  Platform,
   Clipboard,
   Alert,
 } from 'react-native';
@@ -89,11 +88,11 @@ export function PreviewScreen({
       console.log('[PreviewScreen] File read successfully, content length:', fileContent?.length);
       setContent(sanitizeMarkdown(fileContent));
       setLoading(false);
-    } catch (error) {
-      console.error('[PreviewScreen] Error loading file:', error);
+    } catch (err) {
+      console.error('[PreviewScreen] Error loading file:', err);
       setError({
         type: 'read_error',
-        message: `无法读取文件: ${error}`,
+        message: `无法读取文件: ${err}`,
       });
       setLoading(false);
     }
@@ -119,7 +118,7 @@ export function PreviewScreen({
       setCopied(true);
       setTimeout(() => setCopied(false), 2000); // 2秒后重置状态
       Alert.alert('复制成功', '全部内容已复制到剪贴板\n\n💡 提示：长按文字可选择部分复制');
-    } catch (error) {
+    } catch {
       Alert.alert('复制失败', '无法复制内容到剪贴板');
     }
   }, [content]);
